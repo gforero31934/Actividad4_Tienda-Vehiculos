@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+import java.util.Optional;
 
 public class MainFrame extends JFrame {
     private GestorVehiculos gestor;
@@ -81,6 +82,38 @@ public class MainFrame extends JFrame {
         listForSaleButton.addActionListener(e -> listarPlacasDeVehiculosALaVenta());
         panel.add(listForSaleButton);
 
+        JButton sortByModelButton = new JButton("Ordenar por Modelo");
+        sortByModelButton.addActionListener(e -> listarVehiculosPorModelo());
+        panel.add(sortByModelButton);
+
+        JButton sortByBrandButton = new JButton("Ordenar por Marca");
+        sortByBrandButton.addActionListener(e -> listarVehiculosPorMarca());
+        panel.add(sortByBrandButton);
+
+        JButton sortByYearButton = new JButton("Ordenar por Año");
+        sortByYearButton.addActionListener(e -> listarVehiculosPorAnio());
+        panel.add(sortByYearButton);
+
+        JButton decreaseAllValuesButton = new JButton("Disminuir Valor de Vehículos");
+        decreaseAllValuesButton.addActionListener(e -> disminuirValorDeVehiculos());
+        panel.add(decreaseAllValuesButton);
+
+        JButton searchByModelAndYearButton = new JButton("Buscar por Modelo y Año");
+        searchByModelAndYearButton.addActionListener(e -> buscarPorModeloYAnio());
+        panel.add(searchByModelAndYearButton);
+
+        JButton findOldestVehicleButton = new JButton("Localizar Vehículo Más Antiguo");
+        findOldestVehicleButton.addActionListener(e -> localizarVehiculoMasAntiguo());
+        panel.add(findOldestVehicleButton);
+
+        JButton findMostPowerfulVehicleButton = new JButton("Localizar Vehículo Más Potente");
+        findMostPowerfulVehicleButton.addActionListener(e -> localizarVehiculoMasPotente());
+        panel.add(findMostPowerfulVehicleButton);
+
+        JButton findCheapestVehicleButton = new JButton("Localizar Vehículo Más Barato");
+        findCheapestVehicleButton.addActionListener(e -> localizarVehiculoMasBarato());
+        panel.add(findCheapestVehicleButton);
+
         textArea = new JTextArea();
         textArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(textArea);
@@ -133,6 +166,39 @@ public class MainFrame extends JFrame {
             textArea.append(v.toString() + "\n\n");
         }
     }
+    private void disminuirValorDeVehiculos() {
+        String topeText = JOptionPane.showInputDialog(this, "Ingrese el tope:");
+
+        if (topeText == null || topeText.trim().isEmpty()) {
+            textArea.setText("Por favor, ingrese un tope válido.");
+            return;
+        }
+
+        try {
+            double tope = Double.parseDouble(topeText.trim());
+            gestor.disminuirValorDeVehiculosSiSuperan(tope);
+
+            // Crear un mensaje con los nuevos precios
+            StringBuilder mensaje = new StringBuilder("Nuevos precios de vehículos:\n");
+            for (Vehiculo v : gestor.listarVehiculos()) {
+                mensaje.append(String.format("Placa: %s - Nuevo Valor: %.2f\n", v.getPlaca(), v.getValor()));
+            }
+
+            textArea.setText(mensaje.toString());
+        } catch (NumberFormatException e) {
+            textArea.setText("Por favor, ingrese un tope válido.");
+        }
+    }
+
+    private void localizarVehiculoMasAntiguo() {
+        Optional<Vehiculo> vehiculoAntiguo = gestor.vehiculoMasAntiguo();
+
+        if (vehiculoAntiguo.isPresent()) {
+            textArea.setText("Vehículo más antiguo:\n" + vehiculoAntiguo.get().toString());
+        } else {
+            textArea.setText("No hay vehículos registrados.");
+        }
+    }
 
     private void listarPlacasDeVehiculosALaVenta() {
         List<String> placas = gestor.listarPlacasDeVehiculosALaVenta();
@@ -142,6 +208,76 @@ public class MainFrame extends JFrame {
             textArea.setText("Placas de vehículos a la venta:\n" + String.join("\n", placas));
         }
     }
+
+    private void buscarPorModeloYAnio() {
+        String modelo = JOptionPane.showInputDialog(this, "Ingrese el modelo del vehículo:");
+        String anioText = JOptionPane.showInputDialog(this, "Ingrese el año del vehículo:");
+
+        if (modelo == null || modelo.trim().isEmpty() || anioText == null || anioText.trim().isEmpty()) {
+            textArea.setText("Por favor, ingrese un modelo y un año válidos.");
+            return;
+        }
+
+        try {
+            int anio = Integer.parseInt(anioText.trim());
+            List<Vehiculo> resultados = gestor.buscarVehiculosPorModeloYAnio(modelo.trim(), anio);
+
+            if (resultados.isEmpty()) {
+                textArea.setText("No se encontraron vehículos con el modelo " + modelo + " y año " + anio + ".");
+            } else {
+                textArea.setText("Resultados:\n");
+                for (Vehiculo v : resultados) {
+                    textArea.append(v.toString() + "\n\n");
+                }
+            }
+        } catch (NumberFormatException e) {
+            textArea.setText("Por favor, ingrese un año válido.");
+        }
+    }
+
+    private void localizarVehiculoMasPotente() {
+        Optional<Vehiculo> vehiculoPotente = gestor.vehiculoMasPotente();
+
+        if (vehiculoPotente.isPresent()) {
+            textArea.setText("Vehículo más potente:\n" + vehiculoPotente.get().toString());
+        } else {
+            textArea.setText("No hay vehículos registrados.");
+        }
+    }
+
+    private void listarVehiculosPorModelo() {
+        List<Vehiculo> vehiculosOrdenados = gestor.listarVehiculosPorModelo();
+        mostrarListaVehiculos(vehiculosOrdenados);
+    }
+
+    private void listarVehiculosPorMarca() {
+        List<Vehiculo> vehiculosOrdenados = gestor.listarVehiculosPorMarca();
+        mostrarListaVehiculos(vehiculosOrdenados);
+    }
+
+    private void listarVehiculosPorAnio() {
+        List<Vehiculo> vehiculosOrdenados = gestor.listarVehiculosPorAnio();
+        mostrarListaVehiculos(vehiculosOrdenados);
+    }
+
+    // Método auxiliar para mostrar la lista de vehículos en el textArea
+    private void mostrarListaVehiculos(List<Vehiculo> vehiculos) {
+        textArea.setText("Vehículos:\n");
+        for (Vehiculo v : vehiculos) {
+            textArea.append(v.toString() + "\n\n");
+        }
+    }
+
+    private void localizarVehiculoMasBarato() {
+        Optional<Vehiculo> vehiculoBarato = gestor.vehiculoMasBarato();
+
+        if (vehiculoBarato.isPresent()) {
+            textArea.setText("Vehículo más barato:\n" + vehiculoBarato.get().toString());
+        } else {
+            textArea.setText("No hay vehículos registrados.");
+        }
+    }
+
 
     private class AddVehicleAction implements ActionListener {
         @Override

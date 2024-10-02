@@ -54,10 +54,40 @@ public class GestorVehiculos {
         return placas;
     }
 
+    // Método para ordenar vehículos por modelo
+    public List<Vehiculo> listarVehiculosPorModelo() {
+        return vehiculos.stream()
+                .sorted(Comparator.comparing(Vehiculo::getModelo))
+                .toList(); // Usa .collect(Collectors.toList()) si no tienes Java 16+
+    }
 
+    // Método para ordenar vehículos por marca
+    public List<Vehiculo> listarVehiculosPorMarca() {
+        return vehiculos.stream()
+                .sorted(Comparator.comparing(Vehiculo::getMarca))
+                .toList(); // Usa .collect(Collectors.toList()) si no tienes Java 16+
+    }
+
+    // Método para ordenar vehículos por año
+    public List<Vehiculo> listarVehiculosPorAnio() {
+        return vehiculos.stream()
+                .sorted(Comparator.comparingInt(Vehiculo::getAnio))
+                .toList(); // Usa .collect(Collectors.toList()) si no tienes Java 16+
+    }
 
     public Optional<Vehiculo> vehiculoMasAntiguo() {
         return vehiculos.stream().min(Comparator.comparingInt(Vehiculo::getAnio));
+    }
+
+    // Método para listar todos los vehículos
+    public List<Vehiculo> listarVehiculos() {
+        return new ArrayList<>(vehiculos); // Devuelve una copia de la lista
+    }
+
+    public List<Vehiculo> buscarVehiculosPorModeloYAnio(String modelo, int anio) {
+        return vehiculos.stream()
+                .filter(v -> v.getModelo().equalsIgnoreCase(modelo) && v.getAnio() == anio)
+                .toList(); // Usa .collect(Collectors.toList()) si no tienes Java 16+
     }
 
     public Optional<Vehiculo> vehiculoMasPotente() {
@@ -67,8 +97,16 @@ public class GestorVehiculos {
     public Optional<Vehiculo> vehiculoMasBarato() {
         return vehiculos.stream().min(Comparator.comparingDouble(Vehiculo::getValor));
     }
-    // Método para listar todos los vehículos
-    public List<Vehiculo> listarVehiculos() {
-        return new ArrayList<>(vehiculos); // Devuelve una copia de la lista
+
+    public void disminuirValorDeVehiculosSiSuperan(double tope) {
+        for (Vehiculo vehiculo : vehiculos) {
+            if (vehiculo.getValor() > tope) {
+                double nuevoValor = vehiculo.getValor() * 0.90; // Disminuye el valor en un 10%
+                vehiculo.setValor(nuevoValor);
+            }
+        }
     }
 }
+
+
+
